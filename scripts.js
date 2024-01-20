@@ -1,31 +1,30 @@
 const playButton = document.getElementsByClassName('player__button toggle')[0];
 const videoPlayer = document.querySelector('.player__video');
+const playerControls = document.querySelector('.player__controls');
 const progress = document.querySelector('.progress');
 const progressBar = document.querySelector('.progress__filled');
 const sliders = document.querySelectorAll('.player__slider');
 const skipBtns = document.querySelectorAll('[data-skip]');
+const currentTimeShow = document.querySelector('.current_time');
+const totalTimeShow = document.querySelector('.total_time');
+const videoTime = document.querySelector('.video_time');
+const fullscreen = document.querySelector('.fullscreen');
+const playerControlsBar = document.querySelector('.player__controls_bar');
 
-const videos = [
-  'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-  'https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
-  'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
-  'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
-  'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
-  'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
-  'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4',
-  'https://storage.googleapis.com/gtv-videos-bucket/sample/Sintel.jpg',
-  'https://storage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4',
-  'https://storage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
-];
+import videosData from './videosData.js';
 
-const getUrl = videos => {
-  const randomIndex = Math.floor(Math.random() * videos.length);
-  const url = videos[randomIndex];
+const getUrl = videosData => {
+  const randomIndex = Math.floor(Math.random() * videosData.length);
+  const url = videosData[randomIndex].sources[0];
+
+  // console.log(url);
+  videoPlayer.src = url;
+  videoPlayer.poster = videosData[randomIndex].thumb;
 
   return url;
 };
 
-videoPlayer.src = getUrl(videos);
+getUrl(videosData);
 
 const handlePlay = () => {
   if (videoPlayer.paused || videoPlayer.ended) {
@@ -39,6 +38,77 @@ const handlePlay = () => {
   playButton.innerHTML = videoPlayer.paused ? '►' : '❚❚';
 };
 
+const toggleFullscreen = () => {
+  if (document.fullscreenElement) {
+    document.exitFullscreen();
+  } else {
+    videoPlayer.requestFullscreen().catch(err => {
+      console.error('Fullscreen request failed:', err);
+    });
+  }
+};
+
+const formatTime = seconds => {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = Math.floor(seconds % 60);
+  const formattedTime = `${minutes}:${
+    remainingSeconds < 10 ? '0' : ''
+  }${remainingSeconds}`;
+  return formattedTime;
+};
+
+function handleProgress() {
+  const progressPercentage =
+    (videoPlayer.currentTime / videoPlayer.duration) * 100;
+  progressBar.style.flexBasis = `${progressPercentage}%`;
+
+  const totalDuration = videoPlayer.duration;
+  const currentTime = videoPlayer.currentTime;
+
+  if (!isNaN(totalDuration) && !isNaN(currentTime)) {
+    totalTimeShow.innerHTML = formatTime(totalDuration);
+    currentTimeShow.innerHTML = formatTime(currentTime);
+  }
+
+  if (videoPlayer.currentTime === videoPlayer.duration) {
+    setTimeout(() => {
+      getUrl(videosData);
+      handlePlay();
+    }, 1000);
+  }
+}
+
+function scrub(e) {
+  const scrubTime = (e.offsetX / progress.offsetWidth) * videoPlayer.duration;
+  videoPlayer.currentTime = scrubTime;
+}
+
+function handleSliderUpdate() {
+  videoPlayer[this.name] = this.value;
+}
+
+function handleSkip() {
+  videoPlayer.currentTime += +this.dataset.skip;
+}
+
+let hideControlsTimeout;
+
+function showControls() {
+  clearTimeout(hideControlsTimeout);
+  playerControls.style.transform = 'translateY(0)';
+  videoTime.style.transform = 'translateY(0)';
+  videoTime.style.bottom = '56px';
+}
+
+function hideControls() {
+  hideControlsTimeout = setTimeout(() => {
+    playerControls.style.transform = 'translateY(82%)';
+    videoTime.style.transform = 'translateY(82%)';
+    videoTime.style.bottom = '71px';
+  }, 2000);
+}
+
+// Event Listeners
 playButton.addEventListener('click', handlePlay);
 videoPlayer.addEventListener('click', handlePlay);
 document.addEventListener('keydown', event => {
@@ -47,17 +117,8 @@ document.addEventListener('keydown', event => {
     handlePlay();
   }
 });
-
-function handleProgress() {
-  const progressPercentage =
-    (videoPlayer.currentTime / videoPlayer.duration) * 100;
-  progressBar.style.flexBasis = `${progressPercentage}%`;
-}
-
-function scrub(e) {
-  const scrubTime = (e.offsetX / progress.offsetWidth) * videoPlayer.duration;
-  videoPlayer.currentTime = scrubTime;
-}
+fullscreen.addEventListener('click', toggleFullscreen);
+videoPlayer.addEventListener('dblclick', toggleFullscreen);
 
 videoPlayer.addEventListener('timeupdate', handleProgress);
 progress.addEventListener('click', scrub);
@@ -66,18 +127,16 @@ progress.addEventListener('mousedown', () => (mousedown = true));
 progress.addEventListener('mousemove', e => mousedown && scrub(e));
 progress.addEventListener('mouseup', () => (mousedown = false));
 
-function handleSliderUpdate() {
-  videoPlayer[this.name] = this.value;
-}
-
 sliders.forEach(slider => {
   slider.addEventListener('change', handleSliderUpdate);
 });
 
-function handleSkip() {
-  videoPlayer.currentTime += +this.dataset.skip;
-}
-
 skipBtns.forEach(btn => {
   btn.addEventListener('click', handleSkip);
 });
+
+videoPlayer.addEventListener('mouseover', showControls);
+videoPlayer.addEventListener('mouseout', hideControls);
+
+playerControlsBar.addEventListener('mouseover', showControls);
+playerControlsBar.addEventListener('mouseout', hideControls);

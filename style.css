@@ -18,6 +18,7 @@ body {
   background-size: cover;
   align-items: center;
   justify-content: center;
+  font-family: 'Montserrat', sans-serif;
 }
 
 .player {
@@ -25,7 +26,7 @@ body {
   border: 5px solid rgba(0, 0, 0, 0.2);
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
   position: relative;
-  font-size: 0;
+  /* font-size: 0; */
   overflow: hidden;
 }
 
@@ -51,15 +52,15 @@ body {
   color: white;
   text-align: center;
   outline: 0;
-  padding: 0;
+  padding: 10px;
   cursor: pointer;
-  max-width: 50px;
+  flex-basis: 10%;
 }
 .player__button.toggle {
   transition: background-color 0.5s ease-in-out;
 }
 .player__button.toggle.playing {
-  background-color: #4caf50; /* Example visual change */
+  background-color: #4caf50;
 }
 
 .player__button:focus {
@@ -70,9 +71,31 @@ body {
   width: 10px;
   height: 30px;
 }
+.video_time {
+  position: absolute;
+  display: flex;
+  color: #fff;
+  /* bottom: 20px; */
+  width: 100%;
+  justify-content: space-between;
+  transform: translateY(100%) translateY(-5px);
+  transition: all 0.5s;
+  padding: 1px 8px;
+}
+.current_time {
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 10px;
+  padding: 5px 10px;
+}
+.total_time {
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 10px;
+  padding: 5px 10px;
+}
 
 .player__controls {
   display: flex;
+  flex-direction: column;
   position: absolute;
   bottom: 0;
   width: 100%;
@@ -81,8 +104,39 @@ body {
   flex-wrap: wrap;
   background: rgba(0, 0, 0, 0.1);
 }
+.player__controls_bar {
+  display: flex;
+  flex-direction: column;
+  bottom: 0;
+  transition: all 0.5s;
+  background: rgba(0, 0, 0, 0.1);
+}
+.player__controls_buttons {
+  display: flex;
+  align-items: center;
+  padding: 2px 5px;
+  justify-content: center;
+}
+.player__controls_buttons div {
+  display: flex;
+  flex-basis: 50%;
+  justify-content: space-between;
+}
+.player__controls_buttons div button {
+  background: none;
+  border: 0;
+  cursor: pointer;
+  color: white;
+}
+
+.fullscreen {
+  /* font-size: 35px; */
+}
 
 .player:hover .player__controls {
+  transform: translateY(0);
+}
+.player:hover .video_time {
   transform: translateY(0);
 }
 
@@ -95,10 +149,8 @@ body {
 }
 
 .progress {
-  flex: 10;
   position: relative;
   display: flex;
-  flex-basis: 100%;
   height: 5px;
   transition: height 0.3s;
   background: rgba(0, 0, 0, 0.5);
@@ -106,10 +158,9 @@ body {
 }
 
 .progress__filled {
-  width: 50%;
   background: #ffc600;
-  flex: 0;
-  flex-basis: 50%;
+
+  flex-basis: 10%;
 }
 
 /* unholy css to style input type="range" */
