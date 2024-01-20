@@ -105,6 +105,11 @@ function hideControls() {
     playerControls.style.transform = 'translateY(82%)';
     videoTime.style.transform = 'translateY(82%)';
     videoTime.style.bottom = '71px';
+
+    setTimeout(() => {
+      videoTime.style.transform = 'translateY(212%)';
+      videoTime.style.bottom = '71px'; // Adjust to your desired position
+    }, 6000);
   }, 2000);
 }
 
