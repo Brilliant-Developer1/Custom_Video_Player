@@ -32,6 +32,7 @@ const handlePlay = () => {
     playButton.classList.add('playing');
   } else {
     videoPlayer.pause();
+    console.log('hitted');
     playButton.classList.remove('playing');
   }
 
@@ -41,6 +42,7 @@ const handlePlay = () => {
 const toggleFullscreen = () => {
   if (document.fullscreenElement) {
     document.exitFullscreen();
+    // videoPlayer.pause();
   } else {
     videoPlayer.requestFullscreen().catch(err => {
       console.error('Fullscreen request failed:', err);
@@ -115,13 +117,44 @@ function hideControls() {
 
 // Event Listeners
 playButton.addEventListener('click', handlePlay);
-videoPlayer.addEventListener('click', handlePlay);
+videoPlayer.addEventListener('click', event => {
+  event.preventDefault();
+  handlePlay();
+});
+
+// videoPlayer.addEventListener('pointerup', event => {
+//   event.preventDefault();
+//   handlePlay();
+// });
 document.addEventListener('keydown', event => {
   if (event.code === 'Space') {
     event.preventDefault();
     handlePlay();
   }
 });
+
+videoPlayer.addEventListener('keydown', event => {
+  if (event.code === 'Space') {
+    event.preventDefault();
+    handlePlay();
+  }
+});
+
+document.addEventListener('fullscreenchange', () => {
+  // Add or remove the keydown event listener based on fullscreen status
+  if (document.fullscreenElement) {
+    videoPlayer.addEventListener('keydown', handleSpaceKey);
+  } else {
+    videoPlayer.removeEventListener('keydown', handleSpaceKey);
+  }
+});
+
+function handleSpaceKey(event) {
+  if (event.code === 'Space') {
+    event.preventDefault();
+    handlePlay();
+  }
+}
 fullscreen.addEventListener('click', toggleFullscreen);
 videoPlayer.addEventListener('dblclick', toggleFullscreen);
 
